@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motion-Maker Prompt Studio — Nalarka Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        nalarka: {
+                            bg: '#F7F7F5',
+                            ink: '#111111',
+                            accent: '#FFD600',
+                            muted: '#6B7280',
+                            card: '#FFFFFF',
+                            dark: '#141416'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F4F4F0;
+            color: #111111;
+            font-family: 'Inter', sans-serif;
+        }
+        /* Editorial Neo-Brutalist / Studio Subtle Shadows */
+        .studio-card {
+            background: #FFFFFF;
+            border: 1.5px solid #18181B;
+            box-shadow: 4px 4px 0px #18181B;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .studio-card-flat {
+            background: #FFFFFF;
+            border: 1.5px solid #E4E4E7;
+        }
+        .studio-btn {
+            border: 1.5px solid #18181B;
+            box-shadow: 2px 2px 0px #18181B;
+            transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .studio-btn:hover:not(:disabled) {
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0px #18181B;
+        }
+        .studio-btn:active:not(:disabled) {
+            transform: translate(1px, 1px);
+            box-shadow: 0px 0px 0px #18181B;
+        }
+        /* Custom Scrollbar for Prompt Output */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #18181B;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #3F3F46;
+            border-radius: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #52525B;
+        }
+        /* Kinetic Typography Demo Animations */
+        @keyframes kineticPop {
+            0% { transform: scale(0.82) translateY(10px); opacity: 0; }
+            65% { transform: scale(1.05) translateY(-2px); opacity: 1; }
+            100% { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(2deg); }
+        }
+        @keyframes wipeBar {
+            0% { transform: scaleX(0); transform-origin: left; }
+            100% { transform: scaleX(1); transform-origin: left; }
+        }
+        .animate-kinetic {
+            animation: kineticPop 0.65s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+        .animate-float {
+            animation: floatSlow 3.5s ease-in-out infinite;
+        }
+        .animate-wipe {
+            animation: wipeBar 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .grid-bg-pattern {
+            background-size: 24px 24px;
+            background-image: 
+                linear-gradient(to right, rgba(128, 128, 128, 0.12) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(128, 128, 128, 0.12) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-yellow-300 selection:text-black">
+
+    <!-- Top Studio Header -->
+    <header class="sticky top-0 z-40 bg-[#F4F4F0]/95 backdrop-blur-md border-b-2 border-zinc-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-300 border-2 border-zinc-900 flex items-center justify-center shadow-[2px_2px_0px_#18181B]">
+                    <i class="ph-bold ph-film-strip text-xl text-zinc-900"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-black tracking-tight text-lg sm:text-xl text-zinc-900">MOTION-MAKER</span>
+                        <span class="text-[11px] font-mono uppercase font-bold px-2 py-0.5 rounded bg-zinc-900 text-amber-300">Prompt Studio</span>
+                    </div>
+                    <p class="text-xs text-zinc-600 hidden sm:block">Generator Prompt Motion Grafik Presisi • Standar Editorial (30 FPS CFR • Maks 60d)</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-3">
+                <!-- Quick Spec Badge -->
+                <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white border border-zinc-300 text-xs font-mono">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="headerSpecBadge">1920×1080 • 30fps • H.264</span>
+                </div>
+                <button id="btnResetDefaults" type="button" class="studio-btn bg-white hover:bg-zinc-100 text-zinc-900 text-xs sm:text-sm font-semibold px-3 py-2 rounded-lg flex items-center gap-1.5">
+                    <i class="ph-bold ph-arrow-counter-clockwise"></i>
+                    <span class="hidden sm:inline">Reset Default</span>
+                </button>
+                <button id="btnQuickCopyTop" type="button" class="studio-btn bg-amber-300 hover:bg-amber-400 text-zinc-900 text-xs sm:text-sm font-bold px-3.5 py-2 rounded-lg flex items-center gap-1.5">
+                    <i class="ph-bold ph-copy"></i>
+                    <span>Salin Prompt</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Toast Notification Banner -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 pointer-events-none flex flex-col gap-2"></div>
+
+    <!-- Main Studio Workspace -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+
+            <!-- LEFT COLUMN: CONFIGURATION & SCRIPT BUILDER (7 cols) -->
+            <div class="lg:col-span-7 space-y-6">
+
+                <!-- SECTION 1: TOPIK & NASKAH VOICEOVER -->
+                <section class="studio-card rounded-2xl p-5 sm:p-6">
+                    <div class="flex items-start justify-between gap-4 mb-4">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-7 h-7 rounded-lg bg-zinc-900 text-amber-300 font-mono text-xs font-bold flex items-center justify-center">01</span>
+                            <div>
+                                <h2 class="text-base sm:text-lg font-extrabold text-zinc-900 tracking-tight">Topik & Naskah Voiceover</h2>
+                                <p class="text-xs text-zinc-500">Tahap 1 & 4: Voiceover adalah acuan timing utama (rata-rata 2,5 kata/detik)</p>
+                            </div>
+                        </div>
+                        <span class="text-[11px] font-mono font-semibold px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
+                            Maks 60 Detik
+                        </span>
+                    </div>
+
+                    <!-- Topic Input -->
+                    <div class="space-y-2 mb-4">
+                        <label for="topicInput" class="block text-xs font-bold uppercase tracking-wider text-zinc-700">
+                            Topik / Ide Utama Motion Grafik <span class="text-red-500">*</span>
+                        </label>
+                        <textarea id="topicInput" rows="2" placeholder="Contoh: Bagaimana dopamin instan dari scroll video pendek mengubah fokus otak kita dalam 30 detik..." class="w-full rounded-xl border-2 border-zinc-900 bg-zinc-50 p-3 text-sm font-medium text-zinc-900 focus:outline-none focus:bg-white focus:ring-2 focus:ring-amber-300 transition">Bagaimana dopamin digital dari kebiasaan scrolling layar memengaruhi rentang fokus otak manusia modern dan cara mengatasinya.</textarea>
+                        
+                        <!-- Topic Preset Chips -->
+                        <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                            <span class="text-[11px] font-semibold text-zinc-500 mr-1">Inspirasi Cepat:</span>
+                            <button type="button" data-preset-topic="Bagaimana dopamin digital dari kebiasaan scrolling layar memengaruhi rentang fokus otak manusia modern dan cara mengatasinya." class="topic-chip text-xs bg-zinc-100 hover:bg-amber-200 border border-zinc-300 text-zinc-800 px-2.5 py-1 rounded-full font-medium transition">
+                                🧠 Dopamin Digital
+                            </button>
+                            <button type="button" data-preset-topic="Mengapa inflasi diam-diam menggerus daya beli tabungan kita dan perbedaan antara menabung vs berinvestasi." class="topic-chip text-xs bg-zinc-100 hover:bg-amber-200 border border-zinc-300 text-zinc-800 px-2.5 py-1 rounded-full font-medium transition">
+                                💸 Inflasi vs Gaji
+                            </button>
+                            <button type="button" data-preset-topic="Rahasia siklus tidur 90 menit: mengapa bangun di tengah fase deep sleep membuat tubuh justru terasa lelah." class="topic-chip text-xs bg-zinc-100 hover:bg-amber-200 border border-zinc-300 text-zinc-800 px-2.5 py-1 rounded-full font-medium transition">
+                                🌙 Siklus Tidur 90m
+                            </button>
+                            <button type="button" data-preset-topic="Cara kerja Large Language Model (AI Modern): bagaimana komputer memprediksi kata demi kata hingga tampak cerdas." class="topic-chip text-xs bg-zinc-100 hover:bg-amber-200 border border-zinc-300 text-zinc-800 px-2.5 py-1 rounded-full font-medium transition">
+                                🤖 Cara Kerja AI
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Audience & Tone Row -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-5">
+                        <div>
+                            <label for="toneSelect" class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">Gaya Bahasa & Narasi</label>
+                            <select id="toneSelect" class="w-full rounded-xl border-2 border-zinc-900 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-300">
+                                <option value="Editorial Tajam & Ringkas (Gaya Vox)">Editorial Tajam & Ringkas (Gaya VOX)</option>
+                                <option value="Santai, Relatable &Mengalir (Storytelling)">Santai, Relatable & Mengalir</option>
+                                <option value="Cepat, Enerjik & Padat Data (Explainer Cepat)">Cepat, Enerjik & Padat Data</option>
+                                <option value="Profesional, Objektif & Edukatif">Profesional, Objektif & Edukatif</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="targetDurationSelect" class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">Target Durasi Video</label>
+                            <select id="targetDurationSelect" class="w-full rounded-xl border-2 border-zinc-900 bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-zinc-900 focus:outline-none focus:ring-2 focus:ring-amber-300">
+                                <option value="auto">Otomatis Ikuti Naskah (VO + 2.5d)</option>
+                                <option value="20">Pendek & Padat — 20 Detik (600 Frame)</option>
+                                <option value="30" selected>Ideal Explainer — 30 Detik (900 Frame)</option>
+                                <option value="45">Mendalam — 45 Detik (1.350 Frame)</option>
+                                <option value="60">Batas Maksimal — 60 Detik (1.800 Frame)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Mode Naskah Tabs -->
+                    <div class="border-t border-zinc-200 pt-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+                            <label class="text-xs font-bold uppercase tracking-wider text-zinc-700">Mode Penyusunan Naskah Voiceover</label>
+                            <button id="btnGenerateAIScript" type="button" class="studio-btn bg-amber-300 hover:bg-amber-400 text-zinc-900 text-xs font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5">
+                                <i class="ph-bold ph-sparkle"></i>
+                                <span id="aiBtnText">Buat Naskah Otomatis (Gemini AI)</span>
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="scriptMode" value="structured" class="peer sr-only" checked>
+                                <div class="p-3 rounded-xl border-2 border-zinc-300 peer-checked:border-zinc-900 peer-checked:bg-amber-50/70 transition flex items-center gap-2.5">
+                                    <i class="ph-fill ph-text-columns text-lg text-zinc-900"></i>
+                                    <div>
+                                        <div class="text-xs font-bold text-zinc-900">Susun / Edit Naskah di Sini</div>
+                                        <div class="text-[11px] text-zinc-500">Hitung kata, detik & frame secara presisi</div>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="scriptMode" value="ai_prompt_only" class="peer sr-only">
+                                <div class="p-3 rounded-xl border-2 border-zinc-300 peer-checked:border-zinc-900 peer-checked:bg-amber-50/70 transition flex items-center gap-2.5">
+                                    <i class="ph-fill ph-magic-wand text-lg text-zinc-900"></i>
+                                    <div>
+                                        <div class="text-xs font-bold text-zinc-900">Minta AI Target Menulis Naskah</div>
+                                        <div class="text-[11px] text-zinc-500">Prompt menyuruh AI menyusun naskah dulu</div>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Structured Script Editor Box -->
+                        <div id="structuredScriptBox" class="space-y-3 bg-zinc-50 p-4 rounded-xl border border-zinc-200">
+                            <div class="grid grid-cols-1 gap-3">
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="font-bold text-zinc-800">[Hook] — 3 Detik Pertama (Pancingan Visual & Masalah)</span>
+                                        <span class="font-mono text-[11px] text-zinc-500">Target: ~8–12 kata</span>
+                                    </div>
+                                    <input id="scriptHook" type="text" value="Pernah niat buka HP cuma lima menit, tahu-tahu sudah lewat satu jam?" class="script-part w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs sm:text-sm text-zinc-900 focus:outline-none focus:border-zinc-900">
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="font-bold text-zinc-800">[Inti 1] — Penjelasan Mekanisme Utama</span>
+                                        <span class="font-mono text-[11px] text-zinc-500">Target: ~20–25 kata</span>
+                                    </div>
+                                    <textarea id="scriptCore1" rows="2" class="script-part w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs sm:text-sm text-zinc-900 focus:outline-none focus:border-zinc-900">Setiap kali jempolmu menggeser layar, otak melepaskan dopamin instan karena penasaran dengan kejutan video berikutnya.</textarea>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="font-bold text-zinc-800">[Inti 2] — Dampak / Fakta Kunci & Kontras</span>
+                                        <span class="font-mono text-[11px] text-zinc-500">Target: ~20–25 kata</span>
+                                    </div>
+                                    <textarea id="scriptCore2" rows="2" class="script-part w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs sm:text-sm text-zinc-900 focus:outline-none focus:border-zinc-900">Akibatnya, otak terbiasa menerima rangsangan cepat dan mudah bosan saat harus membaca atau bekerja mendalam.</textarea>
+                                </div>
+
+                                <div>
+                                    <div class="flex justify-between text-xs mb-1">
+                                        <span class="font-bold text-zinc-800">[Penutup] — Kesimpulan Tajam & Takeaway</span>
+                                        <span class="font-mono text-[11px] text-zinc-500">Target: ~10–15 kata</span>
+                                    </div>
+                                    <input id="scriptOutro" type="text" value="Beri jeda tanpa layar lima belas menit pagi ini agar fokusmu kembali utuh." class="script-part w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-xs sm:text-sm text-zinc-900 focus:outline-none focus:border-zinc-900">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Real-Time Duration & Frame Calculator Bar (Tahap 4 Spec) -->
+                        <div class="mt-4 p-3.5 rounded-xl bg-zinc-900 text-white">
+                            <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                                <div class="flex items-center gap-2">
+                                    <i class="ph-bold ph-timer text-amber-300 text-lg"></i>
+                                    <span class="text-xs font-bold uppercase tracking-wider text-zinc-300">Kalkulator Durasi Deterministik (Tahap 4)</span>
+                                </div>
+                                <span id="durationStatusBadge" class="text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                    AMAN (≤ 60 DETIK)
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center my-2.5">
+                                <div class="bg-zinc-800/90 rounded-lg p-2 border border-zinc-700">
+                                    <div class="text-[10px] font-mono text-zinc-400 uppercase">Jumlah Kata</div>
+                                    <div id="calcWordCount" class="text-base sm:text-lg font-black text-white font-mono">58 kata</div>
+                                </div>
+                                <div class="bg-zinc-800/90 rounded-lg p-2 border border-zinc-700">
+                                    <div class="text-[10px] font-mono text-zinc-400 uppercase">Estimasi Suara</div>
+                                    <div id="calcVoDuration" class="text-base sm:text-lg font-black text-amber-300 font-mono">23.2 dtk</div>
+                                </div>
+                                <div class="bg-zinc-800/90 rounded-lg p-2 border border-zinc-700">
+                                    <div class="text-[10px] font-mono text-zinc-400 uppercase">Durasi Total Video</div>
+                                    <div id="calcTotalDuration" class="text-base sm:text-lg font-black text-emerald-400 font-mono">26 dtk</div>
+                                </div>
+                                <div class="bg-zinc-800/90 rounded-lg p-2 border border-zinc-700">
+                                    <div class="text-[10px] font-mono text-zinc-400 uppercase">Total Frame (30fps)</div>
+                                    <div id="calcTotalFrames" class="text-base sm:text-lg font-black text-white font-mono">780 frame</div>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar against 60s Hard Limit -->
+                            <div class="w-full h-2 bg-zinc-800 rounded-full overflow-hidden">
+                                <div id="durationProgressBar" class="h-full bg-amber-300 transition-all duration-300" style="width: 43%"></div>
+                            </div>
+                            <div class="flex justify-between items-center text-[11px] font-mono text-zinc-400 mt-1.5">
+                                <span>Rumus: ceil(VO_dur + 1.0d pembuka + 1.5d penutup)</span>
+                                <span>Batas Keras: 60d / 1.800 frame</span>
+                            </div>
+
+                            <!-- Over 60s Warning Banner -->
+                            <div id="overLimitWarning" class="hidden mt-3 p-2.5 rounded-lg bg-red-950/90 border border-red-500 text-red-200 text-xs flex items-start gap-2">
+                                <i class="ph-fill ph-warning-octagon text-red-400 text-lg shrink-0 mt-0.5"></i>
+                                <div>
+                                    <strong class="font-bold text-white">Peringatan Tahap 4: Melebihi Batas Keras 60 Detik!</strong>
+                                    Naskah saat ini menghasilkan durasi di atas 60 detik (~143 kata). Sesuai aturan Motion-Maker, ringkas naskah atau bagi menjadi beberapa bagian sebelum me-render.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2: ARAH VISUAL, GAYA & TIPOGRAFI KINETIK -->
+                <section class="studio-card rounded-2xl p-5 sm:p-6">
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <span class="w-7 h-7 rounded-lg bg-zinc-900 text-amber-300 font-mono text-xs font-bold flex items-center justify-center">02</span>
+                        <div>
+                            <h2 class="text-base sm:text-lg font-extrabold text-zinc-900 tracking-tight">Pengaturan Visual, Tipografi & Gerak</h2>
+                            <p class="text-xs text-zinc-500">Berdasarkan Panduan Visual & Kreatif Motion-Maker (Anti-Slideshow)</p>
+                        </div>
+                    </div>
+
+                    <!-- Aspect Ratio / Resolution Selection -->
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-2">Orientasi & Resolusi Output</label>
+                        <div class="grid grid-cols-3 gap-2.5">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="aspectRatio" value="16:9" data-res="1920x1080" class="peer sr-only" checked>
+                                <div class="p-3 rounded-xl border-2 border-zinc-300 peer-checked:border-zinc-900 peer-checked:bg-amber-300/30 text-center transition">
+                                    <i class="ph-bold ph-monitor text-xl text-zinc-900 mb-1 block"></i>
+                                    <div class="text-xs font-extrabold text-zinc-900">16:9 Landscape</div>
+                                    <div class="text-[11px] font-mono text-zinc-600">1920×1080 (Default)</div>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="aspectRatio" value="9:16" data-res="1080x1920" class="peer sr-only">
+                                <div class="p-3 rounded-xl border-2 border-zinc-300 peer-checked:border-zinc-900 peer-checked:bg-amber-300/30 text-center transition">
+                                    <i class="ph-bold ph-device-mobile text-xl text-zinc-900 mb-1 block"></i>
+                                    <div class="text-xs font-extrabold text-zinc-900">9:16 Vertikal</div>
+                                    <div class="text-[11px] font-mono text-zinc-600">1080×1920 (Reels/Shorts)</div>
+                                </div>
+                            </label>
+                            <label class="cursor-pointer">
+                                <input type="radio" name="aspectRatio" value="1:1" data-res="1080x1080" class="peer sr-only">
+                                <div class="p-3 rounded-xl border-2 border-zinc-300 peer-checked:border-zinc-900 peer-checked:bg-amber-300/30 text-center transition">
+                                    <i class="ph-bold ph-square text-xl text-zinc-900 mb-1 block"></i>
+                                    <div class="text-xs font-extrabold text-zinc-900">1:1 Square</div>
+                                    <div class="text-[11px] font-mono text-zinc-600">1080×1080 (Feed)</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Visual Style Cards -->
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-2">Gaya Visual Utama (Visual Direction)</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                            <label class="cursor-pointer">
+                                <input type="radio" name="visualStyle" value="editorial_default" class="peer sr-only" checked>
+                                <div class="p-3.5 rounded-xl border-2 border-zinc-300 peer-checked:border-zinc-900 peer-checked:bg-amber-50/80 transition h-full">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs font-extrabold text-zinc-900">Editorial Minimalis Premium</span>
+                                        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-900 text-amber-300 font-bold">Default</span>
+                                    </div>
+                                    <p class="text-[11px] text-zinc-600 leading-relaxed">Latar putih/abu terang kontras, tipografi hitam tebal ekspresif, satu aksen kuning berani, komposisi asimetris & potongan berlapis.</p>
+                                </div>
+                            </label>
+
+                            <label class="cursor-pointer">
+                                <input type="radio" name="visualStyle" value="dark_tech" class="peer sr-only">
+                                <div class="p-3.5 rounded-xl border-2 border-zinc-300 peer-checked:border-zinc-900 peer-checked:bg-amber-50/80 transition h-full">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs font-extrabold text-zinc-900">Dark Mode Tech & Data</span>
+                                        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-800 font-bold">Sains/AI</span>
+                                    </div>
+                                    <p class="text-[11px] text-zinc-600 leading-relaxed">Latar charcoal pekat (#0F1115), tipografi putih tajam, aksen cyan/emerald menyala, grid presisi, grafik vektor & angka raksasa.</p>
+                                </div>
+                            </label>
+
+                            <label class="cursor-pointer">
+                                <input type="radio" name="visualStyle" value="warm_zine" class="peer sr-only">
+                                <div class="p-3.5 rounded-xl border-2 border-zinc-300 peer-checked:border-zinc-900 peer-checked:bg-amber-50/80 transition h-full">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs font-extrabold text-zinc-900">Warm Paper & Collage</span>
+                                        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-800 font-bold">Sejarah/Kultur</span>
+                                    </div>
+                                    <p class="text-[11px] text-zinc-600 leading-relaxed">Latar kertas krem hangat (#F5EFE6), tinta espresso, aksen oranye/terracotta, gaya potongan kliping majalah & bayangan tegas.</p>
+                                </div>
+                            </label>
+
+                            <label class="cursor-pointer">
+                                <input type="radio" name="visualStyle" value="geometric_bauhaus" class="peer sr-only">
+                                <div class="p-3.5 rounded-xl border-2 border-zinc-300 peer-checked:border-zinc-900 peer-checked:bg-amber-50/80 transition h-full">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-xs font-extrabold text-zinc-900">Clean Geometric Vector</span>
+                                        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-800 font-bold">Abstrak/Ekonomi</span>
+                                    </div>
+                                    <p class="text-[11px] text-zinc-600 leading-relaxed">Visual murni dari bangun geometris, ikon vektor tebal, diagram dinamis, dan transisi morphing antar bentuk (tanpa foto).</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Custom Palette Pickers -->
+                    <div class="grid grid-cols-3 gap-3 mb-5 p-3.5 rounded-xl bg-zinc-50 border border-zinc-200">
+                        <div>
+                            <label class="block text-[11px] font-bold text-zinc-700 mb-1">Warna Latar</label>
+                            <div class="flex items-center gap-2">
+                                <input id="colorBg" type="color" value="#F7F7F5" class="w-8 h-8 rounded cursor-pointer border border-zinc-400">
+                                <input id="colorBgHex" type="text" value="#F7F7F5" class="w-full font-mono text-xs bg-white border border-zinc-300 rounded px-2 py-1 uppercase">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-zinc-700 mb-1">Tipografi Utama</label>
+                            <div class="flex items-center gap-2">
+                                <input id="colorText" type="color" value="#111111" class="w-8 h-8 rounded cursor-pointer border border-zinc-400">
+                                <input id="colorTextHex" type="text" value="#111111" class="w-full font-mono text-xs bg-white border border-zinc-300 rounded px-2 py-1 uppercase">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-zinc-700 mb-1">Warna Aksen</label>
+                            <div class="flex items-center gap-2">
+                                <input id="colorAccent" type="color" value="#FFD600" class="w-8 h-8 rounded cursor-pointer border border-zinc-400">
+                                <input id="colorAccentHex" type="text" value="#FFD600" class="w-full font-mono text-xs bg-white border border-zinc-300 rounded px-2 py-1 uppercase">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kinetic Typography & Asset Animation Checklists -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Kinetic Typography -->
+                        <div class="p-3.5 rounded-xl border border-zinc-200 bg-zinc-50/60">
+                            <div class="text-xs font-extrabold uppercase tracking-wider text-zinc-800 mb-2.5 flex items-center gap-1.5">
+                                <i class="ph-bold ph-text-aa text-amber-600"></i>
+                                Teknik Tipografi Kinetik
+                            </div>
+                            <div class="space-y-2 text-xs text-zinc-700">
+                                <label class="flex items-start gap-2 cursor-pointer">
+                                    <input type="checkbox" class="kinetic-opt mt-0.5 rounded border-zinc-400 text-zinc-900 focus:ring-amber-400" value="Teks muncul sinkron kata-demi-kata dengan voiceover (pecah frasa pendek, haram satu paragraf utuh)" checked>
+                                    <span>Sinkron kata-demi-kata (frasa pendek, bukan subtitle)</span>
+                                </label>
+                                <label class="flex items-start gap-2 cursor-pointer">
+                                    <input type="checkbox" class="kinetic-opt mt-0.5 rounded border-zinc-400 text-zinc-900 focus:ring-amber-400" value="Skala dengan overshoot terkontrol & blok highlight warna aksen pada kata kunci" checked>
+                                    <span>Scale overshoot & blok highlight warna pada kata kunci</span>
+                                </label>
+                                <label class="flex items-start gap-2 cursor-pointer">
+                                    <input type="checkbox" class="kinetic-opt mt-0.5 rounded border-zinc-400 text-zinc-900 focus:ring-amber-400" value="Reveal dengan masking & teks muncul dari balik objek utama" checked>
+                                    <span>Masking reveal & teks keluar dari balik objek</span>
+                                </label>
+                                <label class="flex items-start gap-2 cursor-pointer">
+                                    <input type="checkbox" class="kinetic-opt mt-0.5 rounded border-zinc-400 text-zinc-900 focus:ring-amber-400" value="Animasi tracking (spasi antar huruf) & kontras hierarki ukuran ekstrem (angka/judul besar vs label kecil)">
+                                    <span>Animasi spasi huruf (tracking) & angka ukuran raksasa</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Asset Animation & Transitions -->
+                        <div class="p-3.5 rounded-xl border border-zinc-200 bg-zinc-50/60">
+                            <div class="text-xs font-extrabold uppercase tracking-wider text-zinc-800 mb-2.5 flex items-center gap-1.5">
+                                <i class="ph-bold ph-Stack text-amber-600"></i>
+                                Animasi Aset & Transisi Scene
+                            </div>
+                            <div class="space-y-2 text-xs text-zinc-700">
+                                <label class="flex items-start gap-2 cursor-pointer">
+                                    <input type="checkbox" class="motion-opt mt-0.5 rounded border-zinc-400 text-zinc-900 focus:ring-amber-400" value="Easing profesional wajib (cubic-bezier ease-out, ease-in-out, anticipation, overshoot — dilarang gerak linear konstan)" checked>
+                                    <span>Easing profesional (ease-out, overshoot — anti-linear)</span>
+                                </label>
+                                <label class="flex items-start gap-2 cursor-pointer">
+                                    <input type="checkbox" class="motion-opt mt-0.5 rounded border-zinc-400 text-zinc-900 focus:ring-amber-400" value="Parallax berlapis, bayangan lembut (drop shadow), dan gerak sekunder mengambang (floating motion)" checked>
+                                    <span>Parallax berlapis, kedalaman bayangan & gerak sekunder</span>
+                                </label>
+                                <label class="flex items-start gap-2 cursor-pointer">
+                                    <input type="checkbox" class="motion-opt mt-0.5 rounded border-zinc-400 text-zinc-900 focus:ring-amber-400" value="Transisi terhubung antar scene: match cut, whip wipe terarah, dan transisi skala/tipografi" checked>
+                                    <span>Transisi menyambung (Match cut, whip wipe & skala)</span>
+                                </label>
+                                <label class="flex items-start gap-2 cursor-pointer">
+                                    <input type="checkbox" class="motion-opt mt-0.5 rounded border-zinc-400 text-zinc-900 focus:ring-amber-400" value="Simulasi motion blur halus pada pergerakan cepat & kamera zoom terkontrol">
+                                    <span>Simulasi motion blur halus & zoom kamera terkontrol</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3: ASET PENGGUNA & PIPELINE TEKNIS -->
+                <section class="studio-card rounded-2xl p-5 sm:p-6">
+                    <div class="flex items-center gap-2.5 mb-4">
+                        <span class="w-7 h-7 rounded-lg bg-zinc-900 text-amber-300 font-mono text-xs font-bold flex items-center justify-center">03</span>
+                        <div>
+                            <h2 class="text-base sm:text-lg font-extrabold text-zinc-900 tracking-tight">Ketersediaan Aset & Pipeline Audio/Render</h2>
+                            <p class="text-xs text-zinc-500">Sesuai Tahap 2, 6 & 7 (`SKILL.md` & `render-dan-verifikasi.md`)</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-2">Aset yang Akan Disertakan User</label>
+                            <div class="space-y-2 text-xs bg-zinc-50 p-3 rounded-xl border border-zinc-200">
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input id="assetVo" type="checkbox" class="rounded border-zinc-400 text-zinc-900">
+                                    <span>File <code class="font-mono bg-zinc-200 px-1 rounded">Suara Voiceover.mp3</code> tersedia</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input id="assetImages" type="checkbox" class="rounded border-zinc-400 text-zinc-900">
+                                    <span>File Gambar <code class="font-mono bg-zinc-200 px-1 rounded">gambar1..N</code> tersedia</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input id="assetRef" type="checkbox" class="rounded border-zinc-400 text-zinc-900">
+                                    <span>File <code class="font-mono bg-zinc-200 px-1 rounded">Referensi Motion Graphic</code> tersedia</span>
+                                </label>
+                                <label class="flex items-center gap-2 cursor-pointer">
+                                    <input id="assetMusic" type="checkbox" class="rounded border-zinc-400 text-zinc-900">
+                                    <span>File <code class="font-mono bg-zinc-200 px-1 rounded">Musik Latar.mp3</code> tersedia</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-2">Preferensi Pipeline & Audio</label>
+                            <div class="space-y-2.5">
+                                <div>
+                                    <span class="text-[11px] font-semibold text-zinc-600 block mb-1">Pipeline Render Prioritas:</span>
+                                    <select id="pipelineSelect" class="w-full rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-zinc-900">
+                                        <option value="Otomatis (Pilih yang terjamin jalan: Python PIL/NumPy/Cairo + FFmpeg atau HTML/CSS Headless)">Otomatis (Python PIL/NumPy atau HTML Headless + FFmpeg)</option>
+                                        <option value="Python Deterministik (Pillow / NumPy / Skia-Python render fungsi t = frame/30 + FFmpeg)">Python Deterministik (Pillow/NumPy + FFmpeg)</option>
+                                        <option value="HTML/CSS/GSAP + Headless Browser Screenshot per-frame + FFmpeg">HTML/CSS/JS + Browser Headless + FFmpeg</option>
+                                        <option value="Remotion (React Video Composition) + FFmpeg">Remotion (React Composition)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <span class="text-[11px] font-semibold text-zinc-600 block mb-1">Penanganan Musik & Audio Mixing:</span>
+                                    <select id="audioMixSelect" class="w-full rounded-lg border border-zinc-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-zinc-900">
+                                        <option value="Auto-ducking (sidechaincompress di bawah VO), adelay VO 1000ms, fade-out 2.5d, limiter 0.95">Standar Motion-Maker (Ducking VO + Delay 1d + Fade 2.5d)</option>
+                                        <option value="Buat musik ambient sintetis sederhana (NumPy/FFmpeg sine chord) + auto-ducking">Buat Musik Ambient Sintetis Otomatis + Ducking</option>
+                                        <option value="Render hanya Voiceover tanpa musik latar (bersih untuk diedit ulang)">Hanya Voiceover (Tanpa Musik Latar)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Workflow Confirmation Option -->
+                    <div class="p-3 rounded-xl bg-amber-50 border border-amber-300 flex items-center justify-between gap-3">
+                        <div class="text-xs text-zinc-800">
+                            <strong class="font-bold block">Mode Eksekusi Tahap 1–7 di AI Agent:</strong>
+                            <span>Pilih apakah AI harus berhenti menunggu persetujuan naskah/timeline atau langsung lanjut me-render MP4.</span>
+                        </div>
+                        <select id="workflowGateSelect" class="rounded-lg border-2 border-zinc-900 bg-white px-2.5 py-1.5 text-xs font-bold text-zinc-900 shrink-0">
+                            <option value="interactive">Konfirmasi Bertahap (Sesuai SKILL.md)</option>
+                            <option value="direct_render">Langsung Eksekusi & Render MP4</option>
+                        </select>
+                    </div>
+                </section>
+
+            </div>
+
+            <!-- RIGHT COLUMN: LIVE VISUAL PREVIEW & PROMPT OUTPUT STUDIO (5 cols, sticky on desktop) -->
+            <div class="lg:col-span-5 lg:sticky lg:top-20 space-y-6">
+
+                <!-- LIVE VISUAL DIRECTION & KINETIC PREVIEW STAGE -->
+                <div class="studio-card rounded-2xl p-4 sm:p-5 bg-white">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+                            <h3 class="text-xs font-extrabold uppercase tracking-wider text-zinc-900">Simulasi Kanvas & Arah Visual</h3>
+                        </div>
+                        <button id="btnReplayPreview" type="button" class="text-xs font-mono font-semibold text-zinc-700 hover:text-zinc-900 bg-zinc-100 hover:bg-amber-200 px-2.5 py-1 rounded-md border border-zinc-300 flex items-center gap-1 transition">
+                            <i class="ph-bold ph-play"></i> Putar Ulang Animasi
+                        </button>
+                    </div>
+
+                    <!-- Dynamic Aspect Ratio Preview Stage Wrapper -->
+                    <div class="w-full bg-zinc-900 rounded-xl p-3 flex items-center justify-center overflow-hidden min-h-[220px]">
+                        <div id="previewCanvas" class="relative w-full aspect-video max-h-[240px] rounded-lg overflow-hidden border border-zinc-700 grid-bg-pattern flex flex-col justify-between p-4 transition-all duration-300" style="background-color: #F7F7F5; color: #111111;">
+                            
+                            <!-- Top HUD inside Canvas -->
+                            <div class="flex items-center justify-between z-10 text-[10px] font-mono opacity-75">
+                                <span id="previewSceneTag" class="px-1.5 py-0.5 rounded font-bold uppercase" style="background-color: #FFD600; color: #111111;">SCENE 01 • HOOK</span>
+                                <span id="previewFrameTag">00:01.00 • FRAME 00030 / 30FPS</span>
+                            </div>
+
+                            <!-- Kinetic Typography Centerpiece -->
+                            <div id="previewKineticContainer" class="my-auto z-10 py-2">
+                                <div class="text-[10px] font-mono uppercase tracking-widest opacity-60 mb-1">EDITORIAL STYLE</div>
+                                <div id="previewMainHeadline" class="font-black tracking-tight leading-none text-lg sm:text-xl animate-kinetic">
+                                    DOPAMIN <span id="previewAccentWord" class="px-1.5 py-0.5 inline-block rounded -rotate-1" style="background-color: #FFD600; color: #111111;">INSTAN</span> MENGUBAH FOKUS OTAK
+                                </div>
+                                <div id="previewSubBar" class="h-1.5 w-24 mt-2.5 rounded-full animate-wipe" style="background-color: #111111;"></div>
+                            </div>
+
+                            <!-- Floating Geometric Cutout Element -->
+                            <div id="previewFloatingShape" class="absolute -right-4 -bottom-4 w-24 h-24 rounded-2xl border-2 opacity-90 flex items-center justify-center animate-float pointer-events-none" style="background-color: #FFD600; border-color: #111111; box-shadow: 4px 4px 0px #111111;">
+                                <i class="ph-bold ph-lightning text-3xl" style="color: #111111;"></i>
+                            </div>
+
+                            <!-- Bottom Timeline Bar inside Canvas -->
+                            <div class="z-10 flex items-center justify-between text-[10px] font-mono opacity-75 pt-1 border-t border-current/15">
+                                <span id="previewResLabel">1920×1080 (16:9)</span>
+                                <span>CFR 30.00 • H.264</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PROMPT OUTPUT CARD -->
+                <div class="studio-card rounded-2xl overflow-hidden bg-zinc-900 text-white border-2 border-zinc-900">
+                    <!-- Output Mode Tabs -->
+                    <div class="bg-zinc-950 p-2 border-b border-zinc-800 flex flex-wrap gap-1">
+                        <button type="button" data-tab="master" class="prompt-tab flex-1 text-[11px] font-bold py-2 px-2.5 rounded-lg bg-amber-300 text-zinc-900 transition text-center">
+                            1. Master Prompt AI
+                        </button>
+                        <button type="button" data-tab="storyboard" class="prompt-tab flex-1 text-[11px] font-bold py-2 px-2.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition text-center">
+                            2. Timeline & Video AI
+                        </button>
+                        <button type="button" data-tab="render_code" class="prompt-tab flex-1 text-[11px] font-bold py-2 px-2.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition text-center">
+                            3. Kode Render & FFmpeg
+                        </button>
+                        <button type="button" data-tab="json" class="prompt-tab text-[11px] font-mono font-bold py-2 px-2.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition text-center">
+                            {JSON}
+                        </button>
+                    </div>
+
+                    <!-- Tab Description Banner -->
+                    <div class="px-4 py-2.5 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between gap-2">
+                        <span id="activeTabDescription" class="text-[11px] text-zinc-300">
+                            Prompt lengkap standar Motion-Maker (Tahap 1–7) untuk AI Agent / Claude / ChatGPT / Cursor.
+                        </span>
+                        <span id="promptCharCount" class="text-[10px] font-mono text-amber-300 shrink-0">0 karakter</span>
+                    </div>
+
+                    <!-- Prompt Textarea / Code Viewer -->
+                    <div class="relative">
+                        <textarea id="promptOutputArea" readonly class="custom-scroll w-full h-[380px] bg-zinc-950 text-zinc-100 font-mono text-xs leading-relaxed p-4 focus:outline-none resize-y selection:bg-amber-300 selection:text-zinc-900"></textarea>
+                    </div>
+
+                    <!-- Action Bar -->
+                    <div class="p-3.5 bg-zinc-900 border-t border-zinc-800 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <button id="btnCopyPrompt" type="button" class="studio-btn bg-amber-300 hover:bg-amber-400 text-zinc-900 text-xs font-extrabold px-4 py-2.5 rounded-xl flex items-center gap-1.5">
+                                <i class="ph-bold ph-copy text-base"></i>
+                                <span>Salin Prompt Siap Pakai</span>
+                            </button>
+                            <button id="btnDownloadPrompt" type="button" class="studio-btn bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-semibold px-3 py-2.5 rounded-xl border border-zinc-600 flex items-center gap-1.5">
+                                <i class="ph-bold ph-download-simple text-base"></i>
+                                <span>Unduh .MD</span>
+                            </button>
+                        </div>
+
+                        <button id="btnGenerateAIStoryboard" type="button" class="studio-btn bg-emerald-400 hover:bg-emerald-300 text-zinc-950 text-xs font-extrabold px-3 py-2.5 rounded-xl flex items-center gap-1.5" title="Gunakan Gemini AI untuk merancang breakdown scene detik demi detik sekarang">
+                            <i class="ph-bold ph-magic-wand text-base"></i>
+                            <span id="aiStoryboardBtnText">Rancang Scene via AI</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- AI Generated Scene Breakdown Preview Modal / Drawer (Hidden until generated) -->
+                <div id="aiStoryboardCard" class="hidden studio-card rounded-2xl p-4 sm:p-5 bg-amber-50/90 border-2 border-zinc-900">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center gap-2">
+                            <i class="ph-fill ph-sparkle text-amber-600 text-lg"></i>
+                            <h4 class="text-xs font-extrabold uppercase tracking-wider text-zinc-900">Hasil Rancangan Timeline Scene (Gemini AI)</h4>
+                        </div>
+                        <button id="btnCloseAiStoryboard" type="button" class="text-xs font-bold text-zinc-500 hover:text-zinc-900">Tutup ✕</button>
+                    </div>
+                    <p class="text-[11px] text-zinc-600 mb-2">Rancangan scene di bawah ini otomatis dimasukkan ke dalam prompt Anda:</p>
+                    <div id="aiStoryboardContent" class="max-h-60 overflow-y-auto bg-white p-3 rounded-xl border border-zinc-300 font-mono text-[11px] text-zinc-800 whitespace-pre-wrap leading-relaxed"></div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-zinc-300 bg-white mt-12 py-5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-500">
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-zinc-900">Motion-Maker Prompt Studio</span>
+                <span>•</span>
+                <span>Mengikuti Spesifikasi Tahap 1–7, Panduan Visual & Render Deterministik</span>
+            </div>
+            <div class="font-mono text-[11px]">
+                Output Target: MP4 (H.264 + AAC) • 30 FPS CFR • Maks 60 Detik (1.800 Frame)
+            </div>
+        </div>
+    </footer>
+
+    <!-- Application Script -->
+    <script>
+        // ==========================================
+        // STATE & PRESET DEFINITIONS
+        // ==========================================
+        const STYLE_PRESETS = {
+            editorial_default: {
+                name: "Editorial Minimalis Premium (Default)",
+                bg: "#F7F7F5",
+                text: "#111111",
+                accent: "#FFD600",
+                desc: "Latar putih/abu muda (#F7F7F5) kontras tinggi, tipografi hitam tebal (#111111) dengan hierarki tegas, satu warna aksen kuning terang (#FFD600), komposisi asimetris dengan ruang kosong yang disengaja, potongan gambar/elemen saling menimpa (layering), serta bayangan lembut terkontrol."
+            },
+            dark_tech: {
+                name: "Dark Mode Tech & Data",
+                bg: "#0F1115",
+                text: "#F8FAFC",
+                accent: "#00F5D4",
+                desc: "Latar charcoal gelap (#0F1115) dengan grid tipis presisi, tipografi putih bersih (#F8FAFC), aksen neon cyan/teal (#00F5D4), diagram vektor tajam, angka statistik berukuran besar, dan pendaran cahaya (glow) minimal yang rapi."
+            },
+            warm_zine: {
+                name: "Warm Paper & Zine Collage",
+                bg: "#F5EFE6",
+                text: "#1C1917",
+                accent: "#EA580C",
+                desc: "Latar warna kertas hangat (#F5EFE6), tipografi tinta gelap (#1C1917), aksen terracotta/oranye tegas (#EA580C), estetika potongan kliping editorial, bingkai tebal, dan bayangan drop-shadow solid."
+            },
+            geometric_bauhaus: {
+                name: "Clean Geometric Vector",
+                bg: "#FFFFFF",
+                text: "#09090B",
+                accent: "#2563EB",
+                desc: "Latar bersih (#FFFFFF), visual dibangun 100% dari bentuk geometris murni, ikon vektor garis tebal, diagram dinamis, warna primer tegas (#2563EB), tanpa ketergantungan pada foto eksternal."
+            }
+        };
+
+        const TAB_DESCRIPTIONS = {
+            master: "Prompt lengkap standar Motion-Maker (Tahap 1–7) untuk AI Agent / Claude / ChatGPT / Cursor.",
+            storyboard: "Prompt khusus menyusun Tabel Timeline Detik-demi-Detik & Visual Prompt untuk AI Video (Runway/Kling/Sora).",
+            render_code: "Prompt teknis kode Python (PIL/NumPy) / HTML Canvas + perintah FFmpeg deterministik 30 FPS.",
+            json: "Spesifikasi proyek dalam format JSON terstruktur untuk integrasi pipeline otomatis."
+        };
+
+        let currentTab = "master";
+        let generatedAiScenesText = "";
+
+        // DOM Elements
+        const topicInput = document.getElementById('topicInput');
+        const toneSelect = document.getElementById('toneSelect');
+        const targetDurationSelect = document.getElementById('targetDurationSelect');
+        const scriptHook = document.getElementById('scriptHook');
+        const scriptCore1 = document.getElementById('scriptCore1');
+        const scriptCore2 = document.getElementById('scriptCore2');
+        const scriptOutro = document.getElementById('scriptOutro');
+        const structuredScriptBox = document.getElementById('structuredScriptBox');
+
+        const colorBg = document.getElementById('colorBg');
+        const colorBgHex = document.getElementById('colorBgHex');
+        const colorText = document.getElementById('colorText');
+        const colorTextHex = document.getElementById('colorTextHex');
+        const colorAccent = document.getElementById('colorAccent');
+        const colorAccentHex = document.getElementById('colorAccentHex');
+
+        const assetVo = document.getElementById('assetVo');
+        const assetImages = document.getElementById('assetImages');
+        const assetRef = document.getElementById('assetRef');
+        const assetMusic = document.getElementById('assetMusic');
+        const pipelineSelect = document.getElementById('pipelineSelect');
+        const audioMixSelect = document.getElementById('audioMixSelect');
+        const workflowGateSelect = document.getElementById('workflowGateSelect');
+
+        const promptOutputArea = document.getElementById('promptOutputArea');
+        const promptCharCount = document.getElementById('promptCharCount');
+        const activeTabDescription = document.getElementById('activeTabDescription');
+
+        // ==========================================
+        // HELPER: TOAST NOTIFICATION (NO ALERT)
+        // ==========================================
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-red-600 text-white' : (type === 'info' ? 'bg-zinc-900 text-amber-300' : 'bg-zinc-900 text-emerald-300');
+            const iconClass = type === 'error' ? 'ph-warning-circle' : 'ph-check-circle';
+
+            toast.className = `${bgClass} border-2 border-zinc-900 shadow-[4px_4px_0px_#18181B] px-4 py-3 rounded-xl text-xs font-bold flex items-center gap-2 pointer-events-auto transition-all duration-300`;
+            toast.innerHTML = `<i class="ph-fill ${iconClass} text-lg"></i><span>${message}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(8px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        // ==========================================
+        // DURATION & FRAME CALCULATOR (TAHAP 4 SPEC)
+        // ==========================================
+        function countWords(str) {
+            return str.trim().split(/\s+/).filter(Boolean).length;
+        }
+
+        function getScriptData() {
+            const mode = document.querySelector('input[name="scriptMode"]:checked').value;
+            const hook = scriptHook.value.trim();
+            const core1 = scriptCore1.value.trim();
+            const core2 = scriptCore2.value.trim();
+            const outro = scriptOutro.value.trim();
+
+            const fullText = `${hook} ${core1} ${core2} ${outro}`.trim();
+            const words = mode === 'structured' ? countWords(fullText) : 62; // default estimate if AI writes it
+
+            // Tahap 4 Formula: ~2.5 kata/detik + 1.0s intro + 1.5s outro, rounded up to full integer second
+            const voSeconds = +(words / 2.5).toFixed(1);
+            const rawTotal = voSeconds + 2.5;
+            const calcTotalSeconds = Math.max(5, Math.ceil(rawTotal));
+
+            const targetChoice = targetDurationSelect.value;
+            const finalDurationSeconds = targetChoice === 'auto' ? calcTotalSeconds : parseInt(targetChoice, 10);
+            const totalFrames = finalDurationSeconds * 30;
+            const fadeOutStart = (finalDurationSeconds - 2.5).toFixed(1);
+            const isOverLimit = calcTotalSeconds > 60 || finalDurationSeconds > 60;
+
+            return {
+                mode,
+                hook,
+                core1,
+                core2,
+                outro,
+                fullText,
+                words,
+                voSeconds,
+                calcTotalSeconds,
+                finalDurationSeconds,
+                totalFrames,
+                fadeOutStart,
+                isOverLimit
+            };
+        }
+
+        function updateCalculatorUI() {
+            const data = getScriptData();
+
+            document.getElementById('calcWordCount').textContent = `${data.words} kata`;
+            document.getElementById('calcVoDuration').textContent = `${data.voSeconds} dtk`;
+            document.getElementById('calcTotalDuration').textContent = `${data.finalDurationSeconds} dtk`;
+            document.getElementById('calcTotalFrames').textContent = `${data.totalFrames} frame`;
+
+            const pct = Math.min(100, Math.round((data.calcTotalSeconds / 60) * 100));
+            const bar = document.getElementById('durationProgressBar');
+            const badge = document.getElementById('durationStatusBadge');
+            const warn = document.getElementById('overLimitWarning');
+
+            bar.style.width = `${pct}%`;
+
+            if (data.isOverLimit) {
+                bar.className = 'h-full bg-red-500 transition-all duration-300';
+                badge.className = 'text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/40';
+                badge.textContent = 'MELEBIHI 60 DETIK!';
+                warn.classList.remove('hidden');
+            } else if (data.calcTotalSeconds >= 50) {
+                bar.className = 'h-full bg-orange-400 transition-all duration-300';
+                badge.className = 'text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-orange-500/20 text-orange-300 border border-orange-500/40';
+                badge.textContent = 'MENDEKATI BATAS 60D';
+                warn.classList.add('hidden');
+            } else {
+                bar.className = 'h-full bg-amber-300 transition-all duration-300';
+                badge.className = 'text-[11px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+                badge.textContent = `AMAN (${data.finalDurationSeconds}d ≤ 60d)`;
+                warn.classList.add('hidden');
+            }
+        }
+
+        // ==========================================
+        // LIVE PREVIEW STAGE UPDATER
+        // ==========================================
+        function updateLiveStagePreview() {
+            const aspectEl = document.querySelector('input[name="aspectRatio"]:checked');
+            const ratio = aspectEl.value;
+            const res = aspectEl.dataset.res;
+
+            const bg = colorBg.value;
+            const text = colorText.value;
+            const accent = colorAccent.value;
+
+            const canvas = document.getElementById('previewCanvas');
+            const sceneTag = document.getElementById('previewSceneTag');
+            const accentWord = document.getElementById('previewAccentWord');
+            const subBar = document.getElementById('previewSubBar');
+            const floatShape = document.getElementById('previewFloatingShape');
+            const resLabel = document.getElementById('previewResLabel');
+            const headline = document.getElementById('previewMainHeadline');
+            const headerSpecBadge = document.getElementById('headerSpecBadge');
+
+            // Adjust aspect ratio class
+            canvas.classList.remove('aspect-video', 'aspect-[9/16]', 'aspect-square', 'max-w-[165px]', 'max-w-[230px]');
+            if (ratio === '16:9') {
+                canvas.classList.add('aspect-video');
+            } else if (ratio === '9:16') {
+                canvas.classList.add('aspect-[9/16]', 'max-w-[165px]');
+            } else {
+                canvas.classList.add('aspect-square', 'max-w-[230px]');
+            }
+
+            // Apply palette
+            canvas.style.backgroundColor = bg;
+            canvas.style.color = text;
+            sceneTag.style.backgroundColor = accent;
+            sceneTag.style.color = bg === '#0F1115' ? '#0F1115' : '#111111';
+            accentWord.style.backgroundColor = accent;
+            accentWord.style.color = '#111111';
+            subBar.style.backgroundColor = text;
+            floatShape.style.backgroundColor = accent;
+            floatShape.style.borderColor = text;
+            floatShape.style.boxShadow = `4px 4px 0px ${text}`;
+
+            // Extract dynamic keywords from topic for preview
+            const rawWords = (topicInput.value.trim() || "MOTION GRAFIK EDITORIAL").toUpperCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(w => w.length > 2);
+            const w1 = rawWords[0] || "TOPIK";
+            const w2 = rawWords[1] || "UTAMA";
+            const w3 = rawWords.slice(2, 5).join(' ') || "DALAM 30 DETIK";
+
+            headline.innerHTML = `${w1} <span id="previewAccentWord" class="px-1.5 py-0.5 inline-block rounded -rotate-1" style="background-color: ${accent}; color: #111111;">${w2}</span> ${w3}`;
+
+            const scriptData = getScriptData();
+            resLabel.textContent = `${res} (${ratio})`;
+            document.getElementById('previewFrameTag').textContent = `DURASI ${scriptData.finalDurationSeconds}D • ${scriptData.totalFrames} FRAMES`;
+            headerSpecBadge.textContent = `${res} • 30fps • ${scriptData.finalDurationSeconds}d`;
+        }
+
+        function triggerPreviewReplay() {
+            const headline = document.getElementById('previewMainHeadline');
+            const subBar = document.getElementById('previewSubBar');
+            headline.classList.remove('animate-kinetic');
+            subBar.classList.remove('animate-wipe');
+            void headline.offsetWidth; // force reflow
+            headline.classList.add('animate-kinetic');
+            subBar.classList.add('animate-wipe');
+        }
+
+        // ==========================================
+        // COLLECT ALL SETTINGS FOR PROMPT GENERATION
+        // ==========================================
+        function collectConfiguration() {
+            const topic = topicInput.value.trim() || "Penjelasan singkat topik populer";
+            const tone = toneSelect.value;
+            const script = getScriptData();
+
+            const aspectEl = document.querySelector('input[name="aspectRatio"]:checked');
+            const aspectRatio = aspectEl.value;
+            const resolution = aspectEl.dataset.res;
+            const [width, height] = resolution.split('x');
+
+            const styleKey = document.querySelector('input[name="visualStyle"]:checked').value;
+            const stylePreset = STYLE_PRESETS[styleKey];
+
+            const palette = {
+                bg: colorBgHex.value,
+                text: colorTextHex.value,
+                accent: colorAccentHex.value
+            };
+
+            const kineticList = Array.from(document.querySelectorAll('.kinetic-opt:checked')).map(el => el.value);
+            const motionList = Array.from(document.querySelectorAll('.motion-opt:checked')).map(el => el.value);
+
+            const assets = {
+                hasVo: assetVo.checked,
+                hasImages: assetImages.checked,
+                hasRef: assetRef.checked,
+                hasMusic: assetMusic.checked
+            };
+
+            const pipeline = pipelineSelect.value;
+            const audioMix = audioMixSelect.value;
+            const workflowGate = workflowGateSelect.value;
+
+            return {
+                topic,
+                tone,
+                script,
+                aspectRatio,
+                resolution,
+                width,
+                height,
+                styleKey,
+                stylePreset,
+                palette,
+                kineticList,
+                motionList,
+                assets,
+                pipeline,
+                audioMix,
+                workflowGate
+            };
+        }
+
+        // ==========================================
+        // PROMPT BUILDERS (4 MODES)
+        // ==========================================
+        function buildMasterPrompt(cfg) {
+            const s = cfg.script;
+            const assetSummary = [
+                cfg.assets.hasVo ? "- `Suara Voiceover.mp3`: TERSEDIA (ukur durasi asli dengan `ffprobe` & jeda kalimat dengan `silencedetect`)." : "- `Suara Voiceover`: BELUM TERSEDIA (gunakan naskah di bawah sebagai acuan timing 2,5 kata/detik atau bantu generate TTS jika tersedia).",
+                cfg.assets.hasImages ? "- `gambar1..N`: TERSEDIA (gunakan dengan teknik cut-out/masking, parallax, dan gerak halus; jangan dibiarkan diam)." : "- `Gambar Aset`: TIDAK ADA GAMBAR EKSTERNAL (bangun 100% visual dari bentuk geometris, ikon vektor tajam, diagram, angka besar, garis, dan tipografi kinetik buatan kode).",
+                cfg.assets.hasRef ? "- `Referensi Motion Graphic`: TERSEDIA (ekstrak frame 2 fps via ffmpeg untuk mengambil prinsip palet, ritme potongan, dan hierarki tipografi — JANGAN menyalin adegan mentah-mentah)." : "- `Referensi Video`: TIDAK ADA (gunakan Gaya Default Editorial Modern sesuai spesifikasi di bawah).",
+                cfg.assets.hasMusic ? "- `Musik Latar.mp3`: TERSEDIA (loop sepanjang video, volume 0.35, sidechain ducking di bawah voiceover, fade-out 2,5 detik di akhir)." : `- \`Musik Latar\`: BELUM ADA (${cfg.audioMix}).`
+            ].join('\n');
+
+            const scriptSection = s.mode === 'structured' ? `### NASKAH VOICEOVER FINAL (ACUAN TIMING UTAMA)
+- **[Hook — 00:01.0 s/d ~00:04.0]**: "${s.hook}"
+- **[Inti 1]**: "${s.core1}"
+- **[Inti 2]**: "${s.core2}"
+- **[Penutup]**: "${s.outro}"
+
+> **Data Hitungan Naskah**: Total **${s.words} kata** (~${s.voSeconds} detik bicara pada kecepatan Bahasa Indonesia 2,5 kata/detik).`
+            : `### INSTRUKSI PENYUSUNAN NASKAH VOICEOVER (TAHAP 1)
+Susun terlebih dahulu naskah voiceover Bahasa Indonesia yang natural saat diucapkan (maksimal **${Math.floor((s.finalDurationSeconds - 2.5) * 2.5)} kata** agar pas di dalam target durasi **${s.finalDurationSeconds} detik** pada kecepatan 2,5 kata/detik) dengan struktur:
+1. **[Hook]** (3 detik pertama: pancingan tajam/pertanyaan singkat)
+2. **[Inti 1]** (penjelasan mekanisme utama)
+3. **[Inti 2]** (fakta kunci / perbandingan visual)
+4. **[Penutup]** (kesimpulan satu kalimat tegas)`;
+
+            const aiSceneAddition = generatedAiScenesText
+                ? `\n### RANCANGAN TIMELINE & SCENE AWAL\n${generatedAiScenesText}\n`
+                : "";
+
+            const gateInstruction = cfg.workflowGate === 'interactive'
+                ? `Ikuti alur kerja bertahap: tunjukkan naskah (Tahap 1) dan tabel rencana timeline & komposisi visual (Tahap 5) secara ringkas, atau jika semua parameter di atas sudah lengkap, langsung bangun pipeline, render seluruh frame, dan ekspor file MP4 final.`
+                : `Semua parameter naskah, durasi, gaya visual, dan timeline di atas TELAH DISETUJUI. Jangan berhenti untuk bertanya lagi — langsung cek lingkungan, bangun kode perender deterministik, render seluruh ${s.totalFrames} frame, lakukan mixing audio, dan verifikasi file \`output.mp4\`.`;
+
+            return `# TUGAS UTAMA: PRODUKSI VIDEO MOTION GRAFIK EXPLAINER (STANDAR MOTION-MAKER)
+
+Anda adalah **Motion-Maker Studio Engine**. Buat sebuah video motion grafik penjelasan singkat berkualitas tinggi dalam Bahasa Indonesia untuk topik berikut, lengkap hingga menghasilkan file video siap tonton (\`output.mp4\`).
+
+## 1. TOPIK & KONTEKS NARASI
+- **Topik Utama**: ${cfg.topic}
+- **Gaya Bahasa & Pembawaan**: ${cfg.tone}
+- **Bahasa Teks & Audio**: Bahasa Indonesia (pertahankan ejaan yang benar, jangan gunakan gambar hasil AI generator untuk merender teks agar huruf tidak rusak/salah eja).
+
+${scriptSection}
+
+---
+
+## 2. SPESIFIKASI TEKNIS & DURASI DETERMINISTIK (ATURAN KERAS)
+- **Format Output**: \`MP4\` (Video: \`libx264\`, \`-pix_fmt yuv420p\`, \`-crf 18\`, \`-preset slow\` | Audio: \`aac\`, \`192k\`, \`48000 Hz\`)
+- **Resolusi & Orientasi**: \`${cfg.width}×${cfg.height}\` (${cfg.aspectRatio})
+- **Frame Rate**: **30 fps CFR** (Constant Frame Rate — wajib \`r_frame_rate = 30/1\` dan \`avg_frame_rate = 30/1\`)
+- **Perhitungan Durasi (Tahap 4)**:
+  - Jeda pembuka sebelum suara masuk: **1,0 detik** (\`adelay=1000:all=1\`)
+  - Estimasi durasi voiceover: **~${s.voSeconds} detik**
+  - Jeda penutup setelah kalimat terakhir: **±1,5 detik** (frame terakhir wajib menampilkan visual penutup yang jelas, bukan layar hitam/kosong)
+  - **Durasi Total Video (\`$DUR\`)**: **${s.finalDurationSeconds} detik** *(Batas keras mutlak: ≤ 60 detik)*
+  - **Jumlah Total Frame (\`$FRAMES\`)**: **${s.totalFrames} frame** (\`frames/00000.png\` s/d \`frames/${String(s.totalFrames - 1).padStart(5, '0')}.png\`)
+
+---
+
+## 3. ARAH VISUAL, TIPOGRAFI KINETIK & GERAK (ANTI-SLIDESHOW)
+- **Gaya Visual Utama**: **${cfg.stylePreset.name}**
+  ${cfg.stylePreset.desc}
+- **Palet Warna Wajib**:
+  - Warna Latar Utama: \`${cfg.palette.bg}\`
+  - Warna Tipografi Utama: \`${cfg.palette.text}\`
+  - Warna Aksen Sorotan: \`${cfg.palette.accent}\`
+- **Aturan Tipografi Kinetik**:
+${cfg.kineticList.map(item => `  - ${item}`).join('\n')}
+  - Gunakan font sistem yang tebal, modern, dan bersih (cek lewat \`fc-list\` atau \`@fontsource\`). Ukur bounding-box teks secara terprogram agar teks Bahasa Indonesia tidak pernah terpotong tepi layar.
+- **Aturan Animasi Aset & Transisi**:
+${cfg.motionList.map(item => `  - ${item}`).join('\n')}
+  - **DILARANG KERAS** membuat tampilan seperti *slideshow* (gambar diam di samping paragraf dengan fade-in berulang). Setiap scene harus memiliki 1 ide visual yang kuat dan saling terhubung.
+
+---
+
+## 4. STATUS ASET & PIPELINE EKSEKUSI
+${assetSummary}
+- **Pipeline Render**: ${cfg.pipeline}
+  Render setiap frame secara deterministik dari fungsi waktu \`t = nomor_frame / 30.0\` tanpa state acak (gunakan seed tetap).
+${aiSceneAddition}
+---
+
+## 5. MIXING AUDIO & VERIFIKASI WAJIB (TAHAP 6 & 7)
+1. **Mixing Audio via FFmpeg**:
+   - Geser voiceover mulai di detik ke-1.0 (\`adelay=1000:all=1\`), pad hingga \`$DUR=${s.finalDurationSeconds}\` detik.
+   - Jika ada musik latar: potong tepat \`${s.finalDurationSeconds}\` detik, volume \`0.35\`, pasang \`sidechaincompress\` (auto-ducking saat voiceover berbicara), fade-out halus mulai detik ke-\`${s.fadeOutStart}\` selama \`2.5\` detik, dan akhiri dengan \`alimiter=limit=0.95\`.
+2. **Verifikasi File Akhir (Jangan Mengira-ngira)**:
+   - Jalankan \`ffprobe\` untuk membuktikan container berdurasi tepat **${s.finalDurationSeconds}.000 detik**, jumlah frame terbaca tepat **${s.totalFrames} frame**, resolusi **${cfg.width}×${cfg.height}**, dan **30 fps CFR**.
+   - Jalankan \`blackdetect\`, \`freezedetect\`, \`silencedetect\`, dan \`volumedetect\`, serta ekstrak beberapa frame kunci ke PNG untuk memastikan tidak ada teks bertabrakan atau terpotong.
+
+### INSTRUKSI EKSEKUSI SEKARANG:
+${gateInstruction}`;
+        }
+
+        function buildStoryboardPrompt(cfg) {
+            const s = cfg.script;
+            return `# PROMPT PERANCANG TIMELINE & STORYBOARD MOTION GRAFIK (TAHAP 5)
+
+Bertindaklah sebagai **Creative Director & Motion Graphics Designer (Gaya Editorial)**.
+Buatkan **Tabel Timeline Detik-demi-Detik** dan **Deskripsi Visual & Gerak Per-Scene** yang presisi untuk proyek berikut:
+
+## DATA PROYEK
+- **Topik**: ${cfg.topic}
+- **Gaya Bahasa**: ${cfg.tone}
+- **Resolusi & Rasio**: ${cfg.width}×${cfg.height} (${cfg.aspectRatio}) @ 30 FPS
+- **Durasi Total**: **${s.finalDurationSeconds} detik (${s.totalFrames} frame)** — Sudah termasuk 1,0 detik pembuka, suara voiceover, dan 1,5 detik penutup.
+- **Gaya Visual**: ${cfg.stylePreset.name}
+- **Palet Warna**: Latar \`${cfg.palette.bg}\` | Teks \`${cfg.palette.text}\` | Aksen \`${cfg.palette.accent}\`
+
+## NASKAH VOICEOVER ACUAN
+1. **[Hook]**: "${s.hook}"
+2. **[Inti 1]**: "${s.core1}"
+3. **[Inti 2]**: "${s.core2}"
+4. **[Penutup]**: "${s.outro}"
+
+## OUTPUT YANG DIMINTA:
+Susun rencana scene terstruktur dari \`00:00.0\` sampai \`00:${String(s.finalDurationSeconds).padStart(2, '0')}.0\` (Frame \`0\` s/d \`${s.totalFrames - 1}\`). Untuk **SETIAP SCENE**, tuliskan:
+1. **Rentang Waktu & Frame**: (contoh: \`00:01.0 – 00:04.5 | Frame 30–135\`)
+2. **Potongan Kalimat Voiceover**: Kata yang diucapkan pada detik tersebut.
+3. **Tipografi Kinetik di Layar**: Frasa pendek maksimal 2–5 kata yang muncul, kata mana yang diberi sorotan warna aksen \`${cfg.palette.accent}\`, dan jenis animasi masuknya (mask reveal, scale overshoot, word-by-word sync).
+4. **Komposisi Visual & Gerak Aset**: Objek/ikon/diagram apa yang tampil, bagaimana gerakannya (parallax, floating, rotasi halus, zoom kamera), serta kurva easing-nya.
+5. **Transisi Keluar**: Bagaimana elemen di scene ini bertransformasi (match cut / whip wipe / zoom-through) menuju scene berikutnya tanpa terasa seperti slideshow.
+6. **Prompt AI Video / B-Roll Pendukung (Opsional Runway Gen-3 / Kling / Sora)**: 1 kalimat prompt bahasa Inggris untuk men-generate klip latar atau elemen visual pendukung bila dibutuhkan.`;
+        }
+
+        function buildRenderCodePrompt(cfg) {
+            const s = cfg.script;
+            return `# PROMPT KODE RENDER DETERMINISTIK (PYTHON PIL/NUMPY + FFMPEG 30 FPS)
+
+Tuliskan skrip **Python (Pillow + NumPy)** yang lengkap, mandiri, dan deterministik beserta perintah **FFmpeg** untuk merender video motion grafik dari waktu \`t = frame_idx / 30.0\` hingga menghasilkan \`output.mp4\`.
+
+## SPESIFIKASI RENDER WAJIB
+- **Resolusi Kanvas**: \`W = ${cfg.width}\`, \`H = ${cfg.height}\`
+- **FPS**: \`30\` (Constant Frame Rate)
+- **Durasi Total (\`DUR\`)**: \`${s.finalDurationSeconds}\` detik
+- **Total Frame (\`FRAMES\`)**: \`${s.totalFrames}\` frame (indeks \`0\` sampai \`${s.totalFrames - 1}\`)
+- **Palet Warna RGB/Hex**:
+  - Background: \`${cfg.palette.bg}\`
+  - Primary Ink/Text: \`${cfg.palette.text}\`
+  - Accent Highlight: \`${cfg.palette.accent}\`
+
+## NASKAH & TIMELINE DATA
+Gunakan struktur timeline berikut di dalam kode Python:
+- \`0.0s - 1.0s\`: Intro visual reveal (judul topik & aksen geometris masuk dengan \`ease_out_back\`)
+- \`1.0s - 4.5s\` [Hook]: "${s.hook}"
+- \`4.5s - ${(s.finalDurationSeconds * 0.45).toFixed(1)}s\` [Inti 1]: "${s.core1}"
+- \`${(s.finalDurationSeconds * 0.45).toFixed(1)}s - ${(s.finalDurationSeconds - 5.5).toFixed(1)}s\` [Inti 2]: "${s.core2}"
+- \`${(s.finalDurationSeconds - 5.5).toFixed(1)}s - ${(s.finalDurationSeconds - 1.5).toFixed(1)}s\` [Penutup]: "${s.outro}"
+- \`${(s.finalDurationSeconds - 1.5).toFixed(1)}s - ${s.finalDurationSeconds}.0s\`: Visual penutup tertahan rapi & musik fade-out.
+
+## PERSYARATAN KODE PYTHON:
+1. Definisikan fungsi easing matematika murni: \`ease_out_cubic(x)\`, \`ease_in_out_cubic(x)\`, dan \`ease_out_back(x, overshoot=1.4)\`.
+2. Buat satu fungsi \`render_frame(frame_idx: int) -> Image.Image\` yang menggambar latar, grid/tekstur tipis, ilustrasi/diagram vektor per-scene, kartu highlight dengan bayangan solid/lembut, dan tipografi kinetik yang mengukur lebar teks dengan \`draw.textbbox()\` agar tidak pernah meluber keluar layar.
+3. Simpan urutan frame ke \`frames/%05d.png\` atau pipe rawvideo \`rgb24\` langsung ke \`ffmpeg\`.
+
+## PERINTAH FFMPEG EKSPOR & MIXING AUDIO:
+\`\`\`bash
+DUR=${s.finalDurationSeconds}
+FRAMES=${s.totalFrames}
+FADE_ST=${s.fadeOutStart}
+
+# Contoh ekspor deterministik 30 fps CFR:
+ffmpeg -y -framerate 30 -i frames/%05d.png \\
+  -c:v libx264 -preset slow -crf 18 -pix_fmt yuv420p -r 30 -frames:v $FRAMES \\
+  -t $DUR -movflags +faststart "output.mp4"
+
+# Verifikasi jumlah frame & durasi:
+ffprobe -v error -count_frames -select_streams v:0 \\
+  -show_entries stream=nb_read_frames,r_frame_rate,avg_frame_rate:format=duration \\
+  -of default=nw=1 output.mp4
+\`\`\``;
+        }
+
+        function buildJsonSpec(cfg) {
+            const s = cfg.script;
+            const specObj = {
+                generator: "Motion-Maker Prompt Studio",
+                version: "1.0",
+                project: {
+                    topic: cfg.topic,
+                    narrative_tone: cfg.tone,
+                    language: "id-ID",
+                    workflow_mode: cfg.workflowGate
+                },
+                technical_constraints: {
+                    container: "mp4",
+                    video_codec: "libx264",
+                    audio_codec: "aac",
+                    pixel_format: "yuv420p",
+                    width: parseInt(cfg.width, 10),
+                    height: parseInt(cfg.height, 10),
+                    aspect_ratio: cfg.aspectRatio,
+                    fps: 30,
+                    cfr_enforced: true,
+                    hard_max_duration_seconds: 60,
+                    calculated_vo_seconds: s.voSeconds,
+                    intro_padding_seconds: 1.0,
+                    outro_padding_seconds: 1.5,
+                    total_duration_seconds: s.finalDurationSeconds,
+                    total_frames: s.totalFrames,
+                    audio_fade_out_start: parseFloat(s.fadeOutStart)
+                },
+                script: {
+                    mode: s.mode,
+                    word_count: s.words,
+                    segments: {
+                        hook: s.hook,
+                        core_1: s.core1,
+                        core_2: s.core2,
+                        outro: s.outro
+                    }
+                },
+                visual_direction: {
+                    style_id: cfg.styleKey,
+                    style_name: cfg.stylePreset.name,
+                    palette: cfg.palette,
+                    kinetic_typography_rules: cfg.kineticList,
+                    motion_and_transition_rules: cfg.motionList
+                },
+                assets_and_pipeline: {
+                    user_assets_provided: cfg.assets,
+                    preferred_render_pipeline: cfg.pipeline,
+                    audio_mixing_strategy: cfg.audioMix
+                }
+            };
+            return JSON.stringify(specObj, null, 2);
+        }
+
+        // ==========================================
+        // MASTER REFRESH FUNCTION
+        // ==========================================
+        function refreshAll() {
+            updateCalculatorUI();
+            updateLiveStagePreview();
+
+            const cfg = collectConfiguration();
+            let outputText = "";
+
+            if (currentTab === "master") {
+                outputText = buildMasterPrompt(cfg);
+            } else if (currentTab === "storyboard") {
+                outputText = buildStoryboardPrompt(cfg);
+            } else if (currentTab === "render_code") {
+                outputText = buildRenderCodePrompt(cfg);
+            } else {
+                outputText = buildJsonSpec(cfg);
+            }
+
+            promptOutputArea.value = outputText;
+            promptCharCount.textContent = `${outputText.length.toLocaleString('id-ID')} karakter`;
+            activeTabDescription.textContent = TAB_DESCRIPTIONS[currentTab];
+        }
+
+        // ==========================================
+        // GEMINI API INTEGRATION (AI SCRIPT & TIMELINE)
+        // ==========================================
+        async function callGeminiWithRetry(payload, maxRetries = 3) {
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            let delay = 1000;
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (err) {
+                    if (attempt === maxRetries - 1) throw err;
+                    await new Promise(r => setTimeout(r, delay));
+                    delay *= 2;
+                }
+            }
+        }
+
+        async function generateScriptWithAI() {
+            const topic = topicInput.value.trim();
+            if (!topic) {
+                showToast("Masukkan topik motion grafik terlebih dahulu!", "error");
+                topicInput.focus();
+                return;
+            }
+
+            const btn = document.getElementById('btnGenerateAIScript');
+            const btnText = document.getElementById('aiBtnText');
+            const origHtml = btnText.textContent;
+
+            btn.disabled = true;
+            btnText.textContent = "Menyusun Naskah...";
+
+            const targetSec = targetDurationSelect.value === 'auto' ? 30 : parseInt(targetDurationSelect.value, 10);
+            const maxWords = Math.max(25, Math.min(130, Math.floor((targetSec - 2.5) * 2.5)));
+
+            const systemPrompt = `Anda adalah penulis naskah video motion grafik explainer Bahasa Indonesia sekelas studio Vox. 
+Buat naskah voiceover singkat, tajam, mudah diucapkan narator, dan tidak bertele-tele.
+Aturan keras:
+- Kecepatan bicara Bahasa Indonesia adalah 2,5 kata per detik.
+- Total gabungan kata dari seluruh bagian HARUS sekitar ${maxWords - 8} hingga ${maxWords} kata (maksimal mutlak 130 kata agar video di bawah 60 detik).
+- Kembalikan HANYA JSON sesuai schema.`;
+
+            const userQuery = `Topik: "${topic}"
+Gaya Bahasa: ${toneSelect.value}
+Target Durasi Total Video: ${targetSec} detik (sekitar ${maxWords} kata total).
+Susun 4 bagian naskah: hook (1 kalimat pancingan 3 detik pertama), core1 (mekanisme utama), core2 (fakta/dampak kontras), dan outro (1 kalimat kesimpulan tajam).`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            hook: { type: "STRING" },
+                            core1: { type: "STRING" },
+                            core2: { type: "STRING" },
+                            outro: { type: "STRING" }
+                        },
+                        required: ["hook", "core1", "core2", "outro"]
+                    }
+                }
+            };
+
+            try {
+                const result = await callGeminiWithRetry(payload);
+                const textJson = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!textJson) throw new Error("Respons AI kosong");
+
+                const parsed = JSON.parse(textJson);
+                // Switch radio to structured mode so user sees it
+                document.querySelector('input[name="scriptMode"][value="structured"]').checked = true;
+                structuredScriptBox.classList.remove('hidden');
+
+                scriptHook.value = parsed.hook || "";
+                scriptCore1.value = parsed.core1 || "";
+                scriptCore2.value = parsed.core2 || "";
+                scriptOutro.value = parsed.outro || "";
+
+                refreshAll();
+                triggerPreviewReplay();
+                showToast("Naskah voiceover berhasil dibuat dengan Gemini AI!");
+            } catch (error) {
+                showToast("Gagal menghubungi AI, silakan coba lagi.", "error");
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = origHtml;
+            }
+        }
+
+        async function generateStoryboardWithAI() {
+            const cfg = collectConfiguration();
+            const btn = document.getElementById('btnGenerateAIStoryboard');
+            const btnText = document.getElementById('aiStoryboardBtnText');
+            const origText = btnText.textContent;
+
+            btn.disabled = true;
+            btnText.textContent = "Merancang Scene...";
+
+            const systemPrompt = `Anda adalah Creative Director Motion-Maker (gaya editorial minimalis).
+Susun ringkasan tabel timeline scene detik-demi-detik (maksimal 5 scene padat) yang sinkron dengan naskah voiceover dan durasi tepat ${cfg.script.finalDurationSeconds} detik (${cfg.script.totalFrames} frame @ 30fps).
+Gunakan format poin ringkas per scene: [Waktu & Frame] | Voiceover | Tipografi Kinetik | Komposisi Visual & Transisi.`;
+
+            const userQuery = `Topik: ${cfg.topic}
+Durasi Total: ${cfg.script.finalDurationSeconds} detik (${cfg.script.totalFrames} frame @ 30fps)
+Gaya Visual: ${cfg.stylePreset.name} (Latar ${cfg.palette.bg}, Teks ${cfg.palette.text}, Aksen ${cfg.palette.accent})
+Naskah:
+- Hook: ${cfg.script.hook}
+- Inti 1: ${cfg.script.core1}
+- Inti 2: ${cfg.script.core2}
+- Penutup: ${cfg.script.outro}`;
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+
+            try {
+                const result = await callGeminiWithRetry(payload);
+                const text = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (!text) throw new Error("Respons kosong");
+
+                generatedAiScenesText = text.trim();
+                document.getElementById('aiStoryboardContent').textContent = generatedAiScenesText;
+                document.getElementById('aiStoryboardCard').classList.remove('hidden');
+
+                refreshAll();
+                showToast("Rancangan Scene berhasil dibuat & disisipkan ke Master Prompt!");
+            } catch (err) {
+                showToast("Gagal merancang timeline scene via AI.", "error");
+            } finally {
+                btn.disabled = false;
+                btnText.textContent = origText;
+            }
+        }
+
+        // ==========================================
+        // CLIPBOARD & DOWNLOAD ACTIONS
+        // ==========================================
+        function copyPromptToClipboard() {
+            promptOutputArea.select();
+            promptOutputArea.setSelectionRange(0, 99999);
+            try {
+                document.execCommand('copy');
+                showToast("Prompt berhasil disalin ke clipboard!");
+            } catch (err) {
+                showToast("Gagal menyalin otomatis, silakan tekan Ctrl+C.", "error");
+            }
+            window.getSelection().removeAllRanges();
+        }
+
+        function downloadPromptFile() {
+            const content = promptOutputArea.value;
+            const ext = currentTab === 'json' ? 'json' : 'md';
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `motion-maker-prompt-${currentTab}.${ext}`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast(`File motion-maker-prompt-${currentTab}.${ext} diunduh!`);
+        }
+
+        function resetToNalarkaDefaults() {
+            topicInput.value = "Bagaimana dopamin digital dari kebiasaan scrolling layar memengaruhi rentang fokus otak manusia modern dan cara mengatasinya.";
+            toneSelect.selectedIndex = 0;
+            targetDurationSelect.value = "30";
+
+            document.querySelector('input[name="scriptMode"][value="structured"]').checked = true;
+            structuredScriptBox.classList.remove('hidden');
+
+            scriptHook.value = "Pernah niat buka HP cuma lima menit, tahu-tahu sudah lewat satu jam?";
+            scriptCore1.value = "Setiap kali jempolmu menggeser layar, otak melepaskan dopamin instan karena penasaran dengan kejutan video berikutnya.";
+            scriptCore2.value = "Akibatnya, otak terbiasa menerima rangsangan cepat dan mudah bosan saat harus membaca atau bekerja mendalam.";
+            scriptOutro.value = "Beri jeda tanpa layar lima belas menit pagi ini agar fokusmu kembali utuh.";
+
+            document.querySelector('input[name="aspectRatio"][value="16:9"]').checked = true;
+            document.querySelector('input[name="visualStyle"][value="editorial_default"]').checked = true;
+
+            const defStyle = STYLE_PRESETS.editorial_default;
+            colorBg.value = defStyle.bg;
+            colorBgHex.value = defStyle.bg;
+            colorText.value = defStyle.text;
+            colorTextHex.value = defStyle.text;
+            colorAccent.value = defStyle.accent;
+            colorAccentHex.value = defStyle.accent;
+
+            assetVo.checked = false;
+            assetImages.checked = false;
+            assetRef.checked = false;
+            assetMusic.checked = false;
+            pipelineSelect.selectedIndex = 0;
+            audioMixSelect.selectedIndex = 0;
+            workflowGateSelect.value = "interactive";
+
+            generatedAiScenesText = "";
+            document.getElementById('aiStoryboardCard').classList.add('hidden');
+
+            refreshAll();
+            triggerPreviewReplay();
+            showToast("Dikembalikan ke pengaturan Default Editorial", "info");
+        }
+
+        // ==========================================
+        // EVENT LISTENERS INITIALIZATION
+        // ==========================================
+        window.onload = function () {
+            // Topic preset chips
+            document.querySelectorAll('.topic-chip').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    topicInput.value = btn.dataset.presetTopic;
+                    refreshAll();
+                    triggerPreviewReplay();
+                });
+            });
+
+            // Script Mode Toggle
+            document.querySelectorAll('input[name="scriptMode"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    if (e.target.value === 'structured') {
+                        structuredScriptBox.classList.remove('hidden');
+                    } else {
+                        structuredScriptBox.classList.add('hidden');
+                    }
+                    refreshAll();
+                });
+            });
+
+            // Visual Style Preset changes palette automatically
+            document.querySelectorAll('input[name="visualStyle"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    const preset = STYLE_PRESETS[e.target.value];
+                    if (preset) {
+                        colorBg.value = preset.bg;
+                        colorBgHex.value = preset.bg;
+                        colorText.value = preset.text;
+                        colorTextHex.value = preset.text;
+                        colorAccent.value = preset.accent;
+                        colorAccentHex.value = preset.accent;
+                    }
+                    refreshAll();
+                    triggerPreviewReplay();
+                });
+            });
+
+            // Sync Color Picker & Hex Text Inputs
+            const syncColorPair = (picker, hexInput) => {
+                picker.addEventListener('input', () => {
+                    hexInput.value = picker.value.toUpperCase();
+                    refreshAll();
+                });
+                hexInput.addEventListener('input', () => {
+                    if (/^#[0-9A-Fa-f]{6}$/.test(hexInput.value.trim())) {
+                        picker.value = hexInput.value.trim();
+                        refreshAll();
+                    }
+                });
+            };
+            syncColorPair(colorBg, colorBgHex);
+            syncColorPair(colorText, colorTextHex);
+            syncColorPair(colorAccent, colorAccentHex);
+
+            // Live inputs binding
+            const allInputs = document.querySelectorAll('input, textarea, select');
+            allInputs.forEach(el => {
+                if (el.id !== 'promptOutputArea') {
+                    el.addEventListener('input', refreshAll);
+                    el.addEventListener('change', refreshAll);
+                }
+            });
+
+            // Output Tab Switching
+            document.querySelectorAll('.prompt-tab').forEach(tabBtn => {
+                tabBtn.addEventListener('click', () => {
+                    currentTab = tabBtn.dataset.tab;
+                    document.querySelectorAll('.prompt-tab').forEach(b => {
+                        b.className = "prompt-tab flex-1 text-[11px] font-bold py-2 px-2.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition text-center";
+                    });
+                    tabBtn.className = "prompt-tab flex-1 text-[11px] font-bold py-2 px-2.5 rounded-lg bg-amber-300 text-zinc-900 transition text-center";
+                    refreshAll();
+                });
+            });
+
+            // Buttons
+            document.getElementById('btnReplayPreview').addEventListener('click', triggerPreviewReplay);
+            document.getElementById('btnCopyPrompt').addEventListener('click', copyPromptToClipboard);
+            document.getElementById('btnQuickCopyTop').addEventListener('click', copyPromptToClipboard);
+            document.getElementById('btnDownloadPrompt').addEventListener('click', downloadPromptFile);
+            document.getElementById('btnResetDefaults').addEventListener('click', resetToNalarkaDefaults);
+            document.getElementById('btnGenerateAIScript').addEventListener('click', generateScriptWithAI);
+            document.getElementById('btnGenerateAIStoryboard').addEventListener('click', generateStoryboardWithAI);
+            document.getElementById('btnCloseAiStoryboard').addEventListener('click', () => {
+                document.getElementById('aiStoryboardCard').classList.add('hidden');
+            });
+
+            // Initial render
+            refreshAll();
+        };
+    </script>
+</body>
+</html>
